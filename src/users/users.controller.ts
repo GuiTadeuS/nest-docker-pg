@@ -7,28 +7,37 @@ import { ResponseUserDto } from './dto/response-user.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
-  @Post()
+  @Post('/create')
   create(@Body() createUserDto: RequestUserDto) {
-    return this.usersService.create(createUserDto);
+    const createdUse = this.usersService.create(createUserDto);
+
+    return new ResponseUserDto(createUserDto);
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+
+    const allUsers = await this.usersService.findAll();
+
+    return allUsers.map(user => new ResponseUserDto(user)); // Mapeia o valor como um ResponseUserDto
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const foundUser = await this.usersService.findOne(+id);
+    return new ResponseUserDto(foundUser[0]);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: ResponseUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: Partial<RequestUserDto>,
+  ) {
+    return await this.usersService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return await this.usersService.remove(+id);
   }
 }
